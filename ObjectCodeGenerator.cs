@@ -7,33 +7,33 @@ using System.Globalization;
 using System.Reflection.Emit;
 using System.Reflection;
 
+
 namespace BlueMoon
 {
     class ObjectCodeGenerator
     {
         public void GenerateObjectCode(List<AnLex.Token> tokens)
         {
-            // Create a dynamic assembly and module 
-            AssemblyName assemblyName = new AssemblyName("CalculatorAssembly");
+            // ensamble dinamico y modulos
+            AssemblyName assemblyName = new AssemblyName("ResultadosAss");
             AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("CalculatorModule");
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("ModuloResultados");
+            
+            TypeBuilder typeBuilder = moduleBuilder.DefineType("Operaciones", TypeAttributes.Public);
 
-            // Define a dynamic type to hold our main method
-            TypeBuilder typeBuilder = moduleBuilder.DefineType("CalculatorType", TypeAttributes.Public);
-
-            // Define a static method for our calculator code
+      
             MethodBuilder methodBuilder = typeBuilder.DefineMethod(
-                "Calculate",
+                "Calcula",
                 MethodAttributes.Public | MethodAttributes.Static,
                 typeof(void),
                 Type.EmptyTypes);
 
-            // Get an ILGenerator and emit the MSIL 
+            // MSIL 
             ILGenerator il = methodBuilder.GetILGenerator();
 
             foreach (var token in tokens)
             {
-                // Generate MSIL based on the token type
+                //  Tipo de token
                 if (token.Type == AnLex.TokenType.Numero)
                 {
                     il.Emit(OpCodes.Ldc_I4, int.Parse(token.Value, CultureInfo.InvariantCulture));
@@ -57,8 +57,7 @@ namespace BlueMoon
                     }
                 }
             }
-
-            // Assuming the last result is the one we're interested in, pop it off the stack and print it.
+            
             il.EmitCall(OpCodes.Call, typeof(Console).GetMethod("WriteLine", new Type[] { typeof(int) }), null);
             il.Emit(OpCodes.Ret);
 
@@ -66,22 +65,17 @@ namespace BlueMoon
             Type calculatorType = typeBuilder.CreateType();
             var calculateMethod = calculatorType.GetMethod("Calculate");
 
-            // Execute the method
+            // ejecutar metodo
             calculateMethod.Invoke(null, null);
 
 
             assemblyBuilder.SetEntryPoint(methodBuilder, PEFileKinds.ConsoleApplication);
-            //Type calculatorType = typeBuilder.CreateType();
-           // var calculateMethod = calculatorType.GetMethod("Calculate");
-
-            // Save the assembly as an executable file
-            string assemblyFileName = "CalculatorAssembly.exe";
+           
+            string assemblyFileName = "ResultadosAss.exe";
             assemblyBuilder.Save(assemblyFileName);
 
-            // ... existing code to invoke the Calculate method
-
-            // Inform the user that the executable has been created
-            Console.WriteLine($"Executable '{assemblyFileName}' has been generated.");
+ 
+            Console.WriteLine($"Executable '{assemblyFileName}' generado.");
 
 
 
